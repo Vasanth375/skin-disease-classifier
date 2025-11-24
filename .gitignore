@@ -1,0 +1,61 @@
+# === ENV FILES ===
+.env
+.env.*
+*.env
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# === Virtual Environments ===
+venv/
+env/
+.venv/
+.python/
+
+# === OS / Editors ===
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# === FastAPI Logs ===
+logs/
+*.log
+
+# === ML / Data ===
+data/
+dataset/
+datasets/
+outputs/
+results/
+reports/
+experiments/
+
+# === Model Artifacts ===
+models/
+!models/.gitkeep
+
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.pkl
+*.joblib
+*.onnx
+*.tflite
+*.pb
+
+# === LFS tracked exceptions ===
+# (Override blocking, allow LFS versions only)
+!*.h5
+!*.onnx
+
+# === Cache / Temp ===
+*.cache
+.cache/
+tmp/
+temp/
