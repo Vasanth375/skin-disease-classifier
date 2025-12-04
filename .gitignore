@@ -38,6 +38,7 @@ experiments/
 # === Model Artifacts ===
 models/
 !models/.gitkeep
+!app/models/
 
 *.h5
 *.hdf5
