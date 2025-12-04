@@ -15,9 +15,13 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=[
+        "https://skin-disease-classifier-tau.vercel.app",
+        "http://localhost:5173",  # for local development
+        "http://localhost:3000"   # alternative local dev
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
