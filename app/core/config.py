@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     
     # Model Configuration
     MODEL_PATH: str = "./models/skin_disease_model.h5"
+    CLINICAL_MODEL_PATH: str = "./models/clinical_skin_model.h5"
     MODEL_INPUT_SIZE: int = 224
     MODEL_CLASSES: int = 7
     

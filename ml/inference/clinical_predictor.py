@@ -51,8 +51,8 @@ class ClinicalSkinPredictor:
         Args:
             model_path: Optional explicit path to the clinical model file.
         """
-        # Default to a separate clinical model path; fall back to settings if needed
-        default_path = "./models/clinical_skin_model.h5"
+        # Default to settings clinical model path; fall back to hardcoded path if needed
+        default_path = settings.CLINICAL_MODEL_PATH
         self.model_path = model_path or default_path
         self.model = None
         self.input_size = settings.MODEL_INPUT_SIZE
