@@ -12,9 +12,9 @@ plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
 
 # Dataset paths
-NEW_DATASET_2_DIR = "./dataset/New Dataset 2/SkinDisNet_3/Processed"
-NEW_DATASET_3_TRAIN_DIR = "./dataset/New Dataset 3/train"
-NEW_DATASET_3_TEST_DIR = "./dataset/New Dataset 3/test"
+NEW_DATASET_2_DIR = "../dataset/New Dataset 2/SkinDisNet_3/Processed"
+NEW_DATASET_3_TRAIN_DIR = "../dataset/New Dataset 3/train"
+NEW_DATASET_3_TEST_DIR = "../dataset/New Dataset 3/test"
 
 
 def count_images_in_folder(folder_path):

@@ -84,7 +84,7 @@ def explore_dataset():
         print("This will generate analysis reports and visualizations.\n")
         total_steps += 1
         try:
-            subprocess.run([sys.executable, "analyze_dataset.py"], check=True)
+            subprocess.run([sys.executable, "ml/analyze_dataset.py"], check=True)
             print("\n[SUCCESS] HAM10000 dataset exploration complete!")
             print("Check the generated files:")
             print("  - dataset_analysis_class_distribution.png")
@@ -100,7 +100,7 @@ def explore_dataset():
     print("\n[2/3] Exploring New Dataset 2 and New Dataset 3...")
     total_steps += 1
     try:
-        subprocess.run([sys.executable, "analyze_new_datasets.py"], check=True)
+        subprocess.run([sys.executable, "ml/analyze_new_datasets.py"], check=True)
         print("\n[SUCCESS] New datasets exploration complete!")
         print("Check the generated files:")
         print("  - new_dataset_2_analysis.png")

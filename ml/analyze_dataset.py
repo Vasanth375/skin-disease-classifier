@@ -13,7 +13,7 @@ plt.style.use('seaborn-v0_8')
 sns.set_palette("husl")
 
 # Dataset paths
-DATASET_DIR = "./dataset"
+DATASET_DIR = "../dataset"
 METADATA_FILE = os.path.join(DATASET_DIR, "HAM10000_metadata.csv")
 IMAGES_PART1 = os.path.join(DATASET_DIR, "HAM10000_images_part_1")
 IMAGES_PART2 = os.path.join(DATASET_DIR, "HAM10000_images_part_2")
