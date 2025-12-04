@@ -3,7 +3,6 @@ Image processing utilities
 """
 import numpy as np
 from PIL import Image
-import cv2
 
 
 def preprocess_image(image: Image.Image, target_size: tuple = (224, 224)) -> np.ndarray:
@@ -30,29 +29,4 @@ def preprocess_image(image: Image.Image, target_size: tuple = (224, 224)) -> np.
     img_array = np.expand_dims(img_array, axis=0)
     
     return img_array
-
-
-def enhance_image(image: Image.Image) -> Image.Image:
-    """
-    Enhance image quality for better prediction
-    
-    Args:
-        image: PIL Image
-    
-    Returns:
-        Enhanced PIL Image
-    """
-    # Convert to OpenCV format
-    img_array = np.array(image)
-    
-    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    if len(img_array.shape) == 3:
-        lab = cv2.cvtColor(img_array, cv2.COLOR_RGB2LAB)
-        l, a, b = cv2.split(lab)
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
-        lab = cv2.merge([l, a, b])
-        img_array = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
-    
-    return Image.fromarray(img_array)
 

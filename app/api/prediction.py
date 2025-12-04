@@ -2,13 +2,10 @@
 Prediction API endpoints
 """
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from typing import List
-import numpy as np
 from PIL import Image
 import io
 
-from app.models.schemas import PredictionResponse, PredictionRequest, SecondaryPrediction
+from app.models.schemas import PredictionResponse, SecondaryPrediction
 from ml.inference.predictor import SkinDiseasePredictor
 from ml.inference.clinical_predictor import ClinicalSkinPredictor
 
