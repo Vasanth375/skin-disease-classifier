@@ -32,41 +32,43 @@ If any packages are missing, install them:
 pip install -r requirements.txt
 ```
 
-#### Step 2: Explore Your Dataset
+#### Step 2: Explore Your Datasets
 
-Analyze the HAM10000 dataset to understand its structure:
+Analyze all available datasets (HAM10000, New Dataset 2, and New Dataset 3):
 
 ```bash
 python workflow.py --explore
 ```
 
-Or directly:
+This will:
+- Analyze HAM10000 dataset (if present)
+- Analyze New Dataset 2 (SkinDisNet_3) (if present)
+- Analyze New Dataset 3 (if present)
+
+Generated files:
+- `dataset_analysis_class_distribution.png` - HAM10000 class distribution
+- `dataset_analysis_demographics.png` - HAM10000 demographics
+- `dataset_analysis_report.txt` - HAM10000 summary report
+- `new_dataset_2_analysis.png` - New Dataset 2 class distribution
+- `new_dataset_3_analysis.png` - New Dataset 3 class distribution
+- `new_datasets_analysis_report.txt` - New datasets summary report
+
+Or run individually:
 ```bash
-python analyze_dataset.py
+python analyze_dataset.py          # HAM10000 only
+python analyze_new_datasets.py     # New Dataset 2 & 3 only
 ```
 
-This will generate:
-- `dataset_analysis_class_distribution.png` - Class distribution charts
-- `dataset_analysis_demographics.png` - Demographic analysis
-- `dataset_analysis_report.txt` - Summary report
+#### Step 3: Prepare the Datasets
 
-#### Step 3: Prepare the Dataset
-
-Organize images into class folders for training:
+Prepare and validate all datasets for training:
 
 ```bash
 python workflow.py --prepare
 ```
 
-Or directly:
-```bash
-python ml/training/prepare_data.py --dataset-dir ./dataset --processed-dir ./data/processed
-```
-
 This will:
-- Read the metadata from `dataset/HAM10000_metadata.csv`
-- Find images in `dataset/HAM10000_images_part_1/` and `dataset/HAM10000_images_part_2/`
-- Organize them into class folders in `data/processed/`:
+- **HAM10000**: Organize images from `HAM10000_images_part_1/` and `HAM10000_images_part_2/` into class folders in `data/processed/`:
   - `actinic_keratosis/`
   - `basal_cell_carcinoma/`
   - `benign_keratosis/`
@@ -74,25 +76,69 @@ This will:
   - `melanoma/`
   - `nevus/`
   - `vascular_lesion/`
+- **New Dataset 2**: Validate that images are already organized in `dataset/New Dataset 2/SkinDisNet_3/Processed/` (already prepared)
+- **New Dataset 3**: Validate that images are already organized in `dataset/New Dataset 3/train/` (already prepared)
 
-#### Step 4: Train the Model
-
-Train the CNN model on your prepared dataset:
-
+Or prepare HAM10000 only:
 ```bash
-python workflow.py --train --epochs 50
+python ml/training/prepare_data.py --dataset-dir ./dataset --processed-dir ./data/processed
+```
+
+**Note**: New Dataset 2 and New Dataset 3 are already organized into class folders, so they only need validation, not reorganization.
+
+#### Step 4: Train the Models
+
+Train the CNN models on your prepared datasets:
+
+**Train Clinical model (New Dataset 3) - RECOMMENDED:**
+```bash
+python workflow.py --train-clinical --epochs 30
 ```
 
 Or directly:
 ```bash
+python -m ml.training.train_clinical_model
+```
+
+**Train HAM10000 (dermoscopic) model (optional if already trained):**
+```bash
+python workflow.py --train --epochs 50
+```
+
+**Note:** If `./models/skin_disease_model.h5` already exists, HAM10000 training will be skipped automatically.
+
+Or train directly:
+```bash
 python ml/training/train_model.py
 ```
 
-**Note:** Training can take 30 minutes to several hours depending on your hardware.
+**Note:** Training can take 30 minutes to several hours depending on your hardware and dataset size.
 
-The model will be saved to: `./models/skin_disease_model.h5`
+**Models saved:**
+- HAM10000 model: `./models/skin_disease_model.h5` (skips training if already exists)
+- Clinical model: `./models/clinical_skin_model.h5`
 
 Training history plots will be saved to: `./models/training_history.png`
+
+**Important:** 
+- If you already have a trained HAM10000 model, you only need to train the clinical model: `python workflow.py --train-clinical`
+- For the dual-model prediction system (recommended), both models should be available. The API will automatically use whichever model has higher confidence for each prediction.
+
+#### (Optional) Train the Clinical Model (New Dataset 3)
+
+To train the separate clinical model using **New Dataset 3**:
+
+```bash
+python -m ml.training.train_clinical_model
+```
+
+Or via the workflow helper:
+
+```bash
+python workflow.py --train-clinical --epochs 30
+```
+
+This will produce a second model at: `./models/clinical_skin_model.h5`, which the API uses alongside the HAM10000 model and automatically picks the more confident prediction at inference time.
 
 #### Step 5: Start the API Server
 

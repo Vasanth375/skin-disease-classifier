@@ -8,21 +8,31 @@ import numpy as np
 from PIL import Image
 import io
 
-from app.models.schemas import PredictionResponse, PredictionRequest
+from app.models.schemas import PredictionResponse, PredictionRequest, SecondaryPrediction
 from ml.inference.predictor import SkinDiseasePredictor
+from ml.inference.clinical_predictor import ClinicalSkinPredictor
 
 router = APIRouter()
 
-# Initialize predictor (lazy loading)
-predictor = None
+# Initialize predictors (lazy loading)
+_dermo_predictor: SkinDiseasePredictor | None = None
+_clinical_predictor: ClinicalSkinPredictor | None = None
 
 
-def get_predictor():
-    """Get or initialize the predictor"""
-    global predictor
-    if predictor is None:
-        predictor = SkinDiseasePredictor()
-    return predictor
+def get_dermo_predictor() -> SkinDiseasePredictor:
+    """Get or initialize the dermoscopic HAM10000 predictor."""
+    global _dermo_predictor
+    if _dermo_predictor is None:
+        _dermo_predictor = SkinDiseasePredictor()
+    return _dermo_predictor
+
+
+def get_clinical_predictor() -> ClinicalSkinPredictor:
+    """Get or initialize the clinical New Dataset 3 predictor."""
+    global _clinical_predictor
+    if _clinical_predictor is None:
+        _clinical_predictor = ClinicalSkinPredictor()
+    return _clinical_predictor
 
 
 @router.post("/predict", response_model=PredictionResponse)
@@ -52,15 +62,75 @@ async def predict_image(file: UploadFile = File(...)):
         if image.mode != "RGB":
             image = image.convert("RGB")
         
-        # Get prediction
-        pred = get_predictor()
-        result = pred.predict(image)
-        
+        # Get predictions from both models
+        dermo_pred = None
+        clinical_pred = None
+        warning: str | None = None
+
+        try:
+            dermo_pred = get_dermo_predictor().predict(image)
+        except Exception as e:  # noqa: BLE001
+            warning = f"Dermoscopy model error: {str(e)}"
+
+        try:
+            clinical_pred = get_clinical_predictor().predict(image)
+        except Exception as e:  # noqa: BLE001
+            if warning:
+                warning += f" | Clinical model error: {str(e)}"
+            else:
+                warning = f"Clinical model error: {str(e)}"
+
+        if dermo_pred is None and clinical_pred is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Both models failed to produce a prediction. Please ensure models are trained.",
+            )
+
+        # Choose primary prediction based on higher confidence
+        if dermo_pred is not None and clinical_pred is not None:
+            if dermo_pred["confidence"] >= clinical_pred["confidence"]:
+                primary = dermo_pred
+                secondary = clinical_pred
+                primary_model_type = "dermoscopic"
+                secondary_model_type = "clinical"
+            else:
+                primary = clinical_pred
+                secondary = dermo_pred
+                primary_model_type = "clinical"
+                secondary_model_type = "dermoscopic"
+        elif dermo_pred is not None:
+            primary = dermo_pred
+            secondary = None
+            primary_model_type = "dermoscopic"
+            secondary_model_type = None
+            if warning is None:
+                warning = "Clinical model unavailable; only dermoscopic prediction returned."
+        else:
+            primary = clinical_pred
+            secondary = None
+            primary_model_type = "clinical"
+            secondary_model_type = None
+            if warning is None:
+                warning = "Dermoscopy model unavailable; only clinical prediction returned."
+
+        secondary_payload = (
+            SecondaryPrediction(
+                model_type=secondary_model_type,
+                predicted_class=secondary["class"],
+                confidence=secondary["confidence"],
+            )
+            if secondary is not None and secondary_model_type is not None
+            else None
+        )
+
         return PredictionResponse(
-            predicted_class=result["class"],
-            confidence=result["confidence"],
-            probabilities=result["probabilities"],
-            all_classes=result["all_classes"]
+            predicted_class=primary["class"],
+            confidence=primary["confidence"],
+            probabilities=primary["probabilities"],
+            all_classes=primary["all_classes"],
+            warning=warning,
+            primary_model_type=primary_model_type,
+            secondary_prediction=secondary_payload,
         )
     
     except Exception as e:
@@ -75,7 +145,8 @@ async def get_classes():
     """
     Get list of all disease classes
     """
-    pred = get_predictor()
+    # For compatibility, expose the original HAM10000 7-class list
+    pred = get_dermo_predictor()
     classes = pred.get_class_names()
     return {"classes": classes}
 
@@ -85,7 +156,7 @@ async def get_model_info():
     """
     Get model information
     """
-    pred = get_predictor()
+    pred = get_dermo_predictor()
     info = pred.get_model_info()
     return info
 

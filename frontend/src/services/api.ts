@@ -1,9 +1,17 @@
+export type SecondaryPrediction = {
+  model_type: string
+  predicted_class: string
+  confidence: number
+}
+
 export type PredictionResponse = {
   predicted_class: string
   confidence: number
   probabilities: Record<string, number>
   all_classes: string[]
   warning?: string | null
+  primary_model_type?: string | null
+  secondary_prediction?: SecondaryPrediction | null
 }
 
 export type HealthResponse = {

@@ -1,0 +1,37 @@
+
+New Datasets Analysis Summary
+======================================================================
+
+NEW DATASET 2 (SkinDisNet_3):
+- Total Images: 1,710
+- Number of Classes: 6
+
+Class Distribution:
+  - Contact Dermatitis (CD)                 :   477 (27.89%)
+  - Eczema (EC)                             :   466 (27.25%)
+  - Scabies (SC)                            :   343 (20.06%)
+  - Tinea Corporis (TC)                     :   275 (16.08%)
+  - Seborrheic Dermatitis (SD)              :    79 ( 4.62%)
+  - Atopic Dermatitis (AD)                  :    70 ( 4.09%)
+
+NEW DATASET 3:
+- Total Training Images: 15,557
+- Total Test Images: 4,002
+- Total Images: 19,559
+- Number of Classes: 23
+
+Top 10 Classes (Training Set):
+  - Psoriasis pictures Lichen Planus and related diseases: 1,405 ( 9.03%)
+  - Seborrheic Keratoses and other Benign Tumors      : 1,371 ( 8.81%)
+  - Tinea Ringworm Candidiasis and other Fungal Infections: 1,300 ( 8.36%)
+  - Eczema Photos                                     : 1,235 ( 7.94%)
+  - Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions: 1,149 ( 7.39%)
+  - Warts Molluscum and other Viral Infections        : 1,086 ( 6.98%)
+  - Nail Fungus and other Nail Disease                : 1,040 ( 6.69%)
+  - Acne and Rosacea Photos                           :   840 ( 5.40%)
+  - Systemic Disease                                  :   606 ( 3.90%)
+  - Light Diseases and Disorders of Pigmentation      :   568 ( 3.65%)
+
+COMBINED STATISTICS:
+- Total Images Across All New Datasets: 21,269
+- Total Classes (unique): 29

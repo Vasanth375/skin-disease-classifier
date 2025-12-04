@@ -14,6 +14,7 @@ const formatLabel = (label: string) =>
 const formatPercentage = (value: number) => `${Math.round(value * 1000) / 10}%`
 
 const CLASS_DESCRIPTIONS: Record<string, string> = {
+  // HAM10000 dermoscopic lesion classes
   actinic_keratosis:
     'Precancerous scaly patches linked to sun damage; dermatology follow-up recommended.',
   basal_cell_carcinoma:
@@ -25,6 +26,54 @@ const CLASS_DESCRIPTIONS: Record<string, string> = {
     'Aggressive skin cancer originating from melanocytes; urgent specialist review required.',
   nevus: 'Commonly known as a mole; most are benign but monitor for ABCDE changes.',
   vascular_lesion: 'Cluster of abnormal blood vessels such as hemangiomas or angiokeratomas.',
+
+  // Clinical model classes (New Dataset 3)
+  'Acne and Rosacea Photos':
+    'Inflammatory conditions causing pimples, redness, and bumps on the face and upper body.',
+  'Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions':
+    'Precancerous and cancerous lesions often related to chronic sun exposure; require prompt evaluation.',
+  'Atopic Dermatitis Photos':
+    'Chronic itchy eczema often starting in childhood, associated with allergies and dry skin.',
+  'Bullous Disease Photos':
+    'Conditions that cause fluid-filled blisters on the skin or mucous membranes (e.g., pemphigus).',
+  'Cellulitis Impetigo and other Bacterial Infections':
+    'Bacterial infections of the skin presenting with redness, warmth, crusting, or pus.',
+  'Eczema Photos':
+    'Inflammatory, itchy rashes with redness, scaling, and sometimes oozing or crusting.',
+  'Exanthems and Drug Eruptions':
+    'Widespread rashes often triggered by infections or medications; may need urgent review.',
+  'Hair Loss Photos Alopecia and other Hair Diseases':
+    'Patchy or diffuse hair loss from various causes including alopecia areata or androgenetic alopecia.',
+  'Herpes HPV and other STDs Photos':
+    'Viral infections of the skin and mucosa, often sexually transmitted and sometimes recurrent.',
+  'Light Diseases and Disorders of Pigmentation':
+    'Conditions causing lighter or darker patches due to pigment changes or sun sensitivity.',
+  'Lupus and other Connective Tissue diseases':
+    'Autoimmune conditions affecting skin and internal organs, often with photosensitive rashes.',
+  'Melanoma Skin Cancer Nevi and Moles':
+    'Pigmented lesions ranging from benign moles to malignant melanoma; require careful monitoring.',
+  'Nail Fungus and other Nail Disease':
+    'Thickened, discolored, or deformed nails from fungal infection or other nail disorders.',
+  'Poison Ivy Photos and other Contact Dermatitis':
+    'Allergic or irritant reactions to substances touching the skin, leading to redness and blisters.',
+  'Psoriasis pictures Lichen Planus and related diseases':
+    'Chronic inflammatory conditions with scaly plaques or flat-topped violaceous papules.',
+  'Scabies Lyme Disease and other Infestations and Bites':
+    'Infestations and bites causing intense itching, burrows, or target-like rashes.',
+  'Seborrheic Keratoses and other Benign Tumors':
+    'Warty, stuck-on growths and other usually harmless skin tumors.',
+  'Systemic Disease':
+    'Skin signs that may be linked to internal organ disease or systemic illness.',
+  'Tinea Ringworm Candidiasis and other Fungal Infections':
+    'Fungal infections causing ring-shaped rashes, scaling, or moist red patches.',
+  'Urticaria Hives':
+    'Transient itchy welts or bumps that appear and fade over hours, often allergic or idiopathic.',
+  'Vascular Tumors':
+    'Benign or malignant growths of blood vessels presenting as red, purple, or bluish lesions.',
+  'Vasculitis Photos':
+    'Inflammation of blood vessels causing purpura, ulcers, or nodules; may be systemic.',
+  'Warts Molluscum and other Viral Infections':
+    'Localized viral growths such as warts or molluscum contagiosum with characteristic bumps.',
 }
 
 function App() {
@@ -107,7 +156,7 @@ function App() {
     }
   }
 
-  const displayedClasses = classes.length ? classes : Object.keys(CLASS_DESCRIPTIONS)
+  const displayedClasses = Object.keys(CLASS_DESCRIPTIONS)
 
   return (
     <div className="app-shell">
@@ -116,8 +165,9 @@ function App() {
           <p className="eyebrow">FastAPI + React</p>
           <h1>Skin Disease Classifier</h1>
           <p className="subtitle">
-            Upload a dermoscopy image to run the latest CNN model hosted by the FastAPI backend.
-            You&apos;ll get real-time predictions with per-class probabilities.
+            Upload a skin image (dermoscopy or clinical photo) to run two CNN models in parallel.
+            The backend automatically chooses the more confident prediction and shows per-class
+            probabilities.
           </p>
         </div>
 
@@ -125,7 +175,9 @@ function App() {
           <span className={`status-pill ${healthStatus}`}>
             API {healthStatus === 'healthy' ? 'online' : healthStatus === 'checking' ? 'checking...' : 'offline'}
           </span>
-          <span className="status-pill neutral">{classes.length} supported classes</span>
+          <span className="status-pill neutral">
+            {Object.keys(CLASS_DESCRIPTIONS).length} documented classes
+          </span>
           <span className="status-pill neutral">{API_BASE_URL}</span>
         </div>
       </header>
@@ -134,7 +186,8 @@ function App() {
         <section className="panel upload-panel">
           <h2>Upload a skin lesion image</h2>
           <p className="helper-text">
-            Supported formats: JPEG, PNG. Clear, well-lit dermoscopy images yield the best results.
+            Supported formats: JPEG, PNG. Clear, well-lit clinical or dermoscopic images yield the
+            best results.
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -172,6 +225,21 @@ function App() {
                 <p className="eyebrow">Likely condition</p>
                 <h3>{formatLabel(result.predicted_class)}</h3>
                 <p className="confidence">Confidence: {formatPercentage(result.confidence)}</p>
+                {result.primary_model_type && (
+                  <p className="helper-text">
+                    Model used:{' '}
+                    {result.primary_model_type === 'clinical'
+                      ? 'Clinical photo model'
+                      : 'Dermoscopy lesion model'}
+                  </p>
+                )}
+                {result.secondary_prediction && (
+                  <p className="helper-text">
+                    Other model ({result.secondary_prediction.model_type}) predicted{' '}
+                    {formatLabel(result.secondary_prediction.predicted_class)} with{' '}
+                    {formatPercentage(result.secondary_prediction.confidence)} confidence.
+                  </p>
+                )}
               </div>
 
               {result.warning && <p className="warning">{result.warning}</p>}
