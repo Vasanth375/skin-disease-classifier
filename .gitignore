@@ -45,15 +45,10 @@ models/
 *.pth
 *.pt
 *.pkl
-*.joblib
-*.onnx
-*.tflite
-*.pb
 
 # === LFS tracked exceptions ===
 # (Override blocking, allow LFS versions only)
-!*.h5
-!*.onnx
+# !*.h5
 
 # === Cache / Temp ===
 *.cache
